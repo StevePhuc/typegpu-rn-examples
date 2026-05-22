@@ -1,18 +1,9 @@
-import {
-  useBindGroup,
-  useBuffer,
-  useConfigureContext,
-  useFrame,
-  useRoot,
-  useUniform,
-} from "@typegpu/react";
+import { useBindGroup, useBuffer, useConfigureContext, useRoot, useUniform } from "@typegpu/react";
 import { useMemo, useRef } from "react";
 import { useWindowDimensions } from "react-native";
 import { Canvas, WebGPUModule } from "react-native-wgpu";
 import tgpu, { type TgpuVertexFn, type TgpuFragmentFn, d, std } from "typegpu";
-import { useFrame as useFrameUI, useRootUI } from "./hooks.ts";
-
-WebGPUModule.install();
+import { useFrameUI, useRootUI } from "./hooks.ts";
 
 const triangleAmount = 500;
 const triangleSize = 0.08;
@@ -47,7 +38,7 @@ const triangleVertices = tgpu.const(d.arrayOf(d.vec2f), [
 ]);
 
 function mainVert(input: TgpuVertexFn.AutoInEmpty) {
-  'use gpu';
+  "use gpu";
 
   const boid = renderLayout.$.boids[input.$instanceIndex];
   const localPos = triangleVertices.$[input.$vertexIndex];
@@ -55,10 +46,7 @@ function mainVert(input: TgpuVertexFn.AutoInEmpty) {
   const angle = getRotationFromVelocity(boid.velocity);
 
   const pos = d.vec4f(boid.position + rotate(localPos, angle), 0, 1);
-  const color = d.vec4f(
-    std.sin(renderLayout.$.colorPalette + angle) * 0.45 + 0.45,
-    1,
-  );
+  const color = d.vec4f(std.sin(renderLayout.$.colorPalette + angle) * 0.45 + 0.45, 1);
 
   return {
     $position: pos,
@@ -67,7 +55,7 @@ function mainVert(input: TgpuVertexFn.AutoInEmpty) {
 }
 
 function mainFrag(input: TgpuFragmentFn.AutoIn<{ color: d.v4f }>) {
-  'use gpu';
+  "use gpu";
   return input.color;
 }
 
@@ -215,14 +203,8 @@ export default function Boids() {
   const initialData = useMemo(
     () =>
       Array.from({ length: triangleAmount }, () => ({
-        position: [Math.random() * 2 - 1, Math.random() * 2 - 1] as [
-          number,
-          number,
-        ],
-        velocity: [Math.random() * 0.1 - 0.05, Math.random() * 0.1 - 0.05] as [
-          number,
-          number,
-        ],
+        position: [Math.random() * 2 - 1, Math.random() * 2 - 1] as [number, number],
+        velocity: [Math.random() * 0.1 - 0.05, Math.random() * 0.1 - 0.05] as [number, number],
       })),
     [],
   );
@@ -259,24 +241,27 @@ export default function Boids() {
 
   const { ref, ctxRef } = useConfigureContext({ alphaMode: "premultiplied" });
 
-  const evenRef = useRef(false);
-  useFrame(() => {
-    if (!ctxRef.current) {
-      return;
-    }
+  // const evenRef = useRef(false);
+  useFrameUI(() => {
+    "worklet";
+    // const ctx = ctxRef.current;
+    // if (!ctx) {
+    //   return;
+    // }
 
-    evenRef.current = !evenRef.current;
+    console.log("Root on the UI thread: ", root);
 
-    computePipeline
-      .with(computeBindGroups[evenRef.current ? 0 : 1])
-      .dispatchThreads(triangleAmount);
+    // const even = false;
+    // // evenRef.current = !evenRef.current;
 
-    renderPipeline
-      .withColorAttachment({ view: ctxRef.current })
-      .with(renderBindGroups[evenRef.current ? 1 : 0])
-      .draw(3, triangleAmount);
+    // computePipeline.with(computeBindGroups[even ? 0 : 1]).dispatchThreads(triangleAmount);
 
-    ctxRef.current.present?.();
+    // renderPipeline
+    //   .withColorAttachment({ view: ctx })
+    //   .with(renderBindGroups[even ? 1 : 0])
+    //   .draw(3, triangleAmount);
+
+    // ctx.present?.();
   });
 
   const { width, height } = useWindowDimensions();

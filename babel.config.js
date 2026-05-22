@@ -1,7 +1,7 @@
 /** @type {import('react-native-worklets/plugin').PluginOptions} */
 const workletsPluginOptions = {
   bundleMode: true,
-  strictGlobal: false, // optional, but recommended
+  strictGlobal: true, // optional, but recommended
   workletizableModules: ["node_modules/typegpu"],
 };
 

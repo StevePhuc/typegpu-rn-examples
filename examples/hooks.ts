@@ -1,7 +1,9 @@
 import { useRoot } from "@typegpu/react";
 import { useEffect, useRef, useState } from "react";
 import { createShareable, scheduleOnUI, UIRuntimeId } from "react-native-worklets";
-import tgpu, { type TgpuRoot } from "typegpu";
+
+import { d, type TgpuRoot } from "typegpu";
+import { tgpu } from "typegpu";
 
 // interface SharedState {
 //   pendingDevice: Promise<GPUDevice> | undefined;
@@ -27,11 +29,72 @@ import tgpu, { type TgpuRoot } from "typegpu";
 //   },
 // });
 
-type TgpuRootWithId = TgpuRoot & { __worklet_id?: number };
-let NEXT_WORKLET_ID = 0;
+// registerCustomSerializable({
+//   name: "typegpu.NonCallableSchema",
+//   determine: (value): value is d.AnyWgslData => {
+//     "worklet";
+//     return (
+//       d.isWgslData(value) &&
+//       (value as d.AnyWgslData).type !== "array" &&
+//       (value as d.AnyWgslData).type !== "struct" &&
+//       (value as d.AnyWgslData).type !== "decorated"
+//     );
+//   },
+//   pack: (value) => {
+//     "worklet";
+//     if (value.type === "vec2<bool>") {
+//       return { type: "vec2b" as const };
+//     }
+//     if (value.type === "vec3<bool>") {
+//       return { type: "vec3b" as const };
+//     }
+//     if (value.type === "vec4<bool>") {
+//       return { type: "vec4b" as const };
+//     }
+//     return { type: value.type };
+//   },
+//   unpack: (value) => {
+//     "worklet";
+//     return d[value.type as keyof typeof d] as d.AnyWgslData;
+//   },
+// });
 
 // registerCustomSerializable({
-//   name: "TgpuRoot",
+//   name: "typegpu.WgslArray",
+//   determine: (value): value is d.WgslArray => {
+//     "worklet";
+//     return d.isWgslData(value) && (value as d.WgslArray).type === "array";
+//   },
+//   pack: (value) => {
+//     "worklet";
+//     return { elementType: value.elementType as d.AnyWgslData, elementCount: value.elementCount };
+//   },
+//   unpack: (value) => {
+//     "worklet";
+//     return d.arrayOf(value.elementType, value.elementCount);
+//   },
+// });
+
+// registerCustomSerializable({
+//   name: "typegpu.WgslStruct",
+//   determine: (value): value is d.WgslStruct => {
+//     "worklet";
+//     return d.isWgslData(value) && (value as d.WgslStruct).type === "struct";
+//   },
+//   pack: (value) => {
+//     "worklet";
+//     console.log("Serializing struct: ", value);
+//     return { props: value.propTypes as Record<string, d.AnyWgslData> };
+//   },
+//   unpack: (value) => {
+//     "worklet";
+//     console.log("Deserializing struct: ", value);
+//     return d.struct(value.props);
+//   },
+// });
+
+// registerCustomSerializable({
+//   name: "typegpu.TgpuRoot",
 //   determine: (value): value is TgpuRoot => {
 //     "worklet";
 //     // I think it's the most unique method on roots
@@ -39,7 +102,9 @@ let NEXT_WORKLET_ID = 0;
 //   },
 //   pack: (value) => {
 //     "worklet";
-//     // const root = value as TgpuRootWithId;
+//     console.log("Serializing root: ", value);
+//     console.log("Device: ", value.device);
+//     console.log("Is device serializable: ", isSerializableRef(value.device));
 
 //     return {
 //       device: value.device,
@@ -48,7 +113,14 @@ let NEXT_WORKLET_ID = 0;
 //   },
 //   unpack: (value) => {
 //     "worklet";
-//     return tgpu.initFromDevice({ device: value.device });
+//     console.log("Deserializing root: ", value);
+
+//     // try {
+//     //   typegpu.tgpu.initFromDevice({ device: value.device });
+//     // } catch (e) {
+//     //   console.log(e);
+//     // }
+//     return {} as TgpuRoot;
 //   },
 // });
 
@@ -237,7 +309,7 @@ export function useRootUI(): TgpuRoot {
 //   return fakeState.shareable;
 // }
 
-export function useFrame(cb: (timestep: number) => void) {
+export function useFrameUI(cb: (timestep: number) => void) {
   const prevCb = useRef(cb);
   const [shareable] = useState(() => {
     return createShareable<undefined, { cb: (timestep: number) => void }>(UIRuntimeId, undefined, {
