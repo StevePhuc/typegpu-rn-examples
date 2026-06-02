@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@loaders.gl/core": "^4.3.4",
+    "@loaders.gl/gltf": "4.3.4",
     "@loaders.gl/obj": "^4.3.4",
     "@typegpu/color": "^0.11.0",
     "@typegpu/noise": "^0.11.0",

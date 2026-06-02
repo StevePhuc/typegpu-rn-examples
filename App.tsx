@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text } from 'react-native';
 import {
   Gesture,
   GestureDetector,
@@ -14,8 +14,9 @@ import FluidWithAtomics from './examples/FluidWithAtomics.tsx';
 import FunctionVisualizer from './examples/FunctionVisualizer.tsx';
 import GameOfLife from './examples/GameOfLife.tsx';
 import Jelly from './examples/Jelly/Jelly.tsx';
+import MeshSkinning from './examples/MeshSkinning/MeshSkinning.tsx';
 
-const examples = ['🐠', '🚰', '🎮', '📈', '🛁', '🐥', '🪼'] as const;
+const examples = ['🐠', '🚰', '🎮', '📈', '🛁', '🐥', '🪼', '🦴'] as const;
 
 export default function App() {
   const [currentExample, setCurrentExample] =
@@ -46,39 +47,48 @@ export default function App() {
             zIndex: 30,
           }}
         >
-          <GestureDetector gesture={gesture}>
-            <Animated.View
-              style={{
-                flex: 1,
-                alignItems: 'center',
-                justifyContent: 'center',
-                position: 'static',
-                width: '100%',
-              }}
-            >
-              {currentExample === '🐥' ? (
-                <Boids />
-              ) : currentExample === '🛁' ? (
-                <FluidDoubleBuffering />
-              ) : currentExample === '🚰' ? (
-                <FluidWithAtomics />
-              ) : currentExample === '🎮' ? (
-                <GameOfLife />
-              ) : currentExample === '📈' ? (
-                <FunctionVisualizer />
-              ) : currentExample === '🐠' ? (
-                <Fish />
-              ) : currentExample === '🪼' ? (
-                <Jelly isDragging={isDragging} mousePos={mousePos} />
-              ) : null}
-            </Animated.View>
-          </GestureDetector>
-          <View
+          <Animated.View
             style={{
+              flex: 1,
+              alignItems: 'center',
+              justifyContent: 'center',
+              position: 'static',
+              width: '100%',
+            }}
+          >
+            {currentExample === '🐥' ? (
+              <Boids />
+            ) : currentExample === '🛁' ? (
+              <FluidDoubleBuffering />
+            ) : currentExample === '🚰' ? (
+              <FluidWithAtomics />
+            ) : currentExample === '🎮' ? (
+              <GameOfLife />
+            ) : currentExample === '📈' ? (
+              <FunctionVisualizer />
+            ) : currentExample === '🐠' ? (
+              <Fish />
+            ) : currentExample === '🪼' ? (
+              <GestureDetector gesture={gesture}>
+                <Jelly isDragging={isDragging} mousePos={mousePos} />
+              </GestureDetector>
+            ) : currentExample === '🦴' ? (
+              <MeshSkinning />
+            ) : null}
+          </Animated.View>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{
               flexDirection: 'row',
               gap: 20,
-              paddingVertical: 40,
+              paddingHorizontal: 20,
               alignItems: 'center',
+            }}
+            style={{
+              flexGrow: 0,
+              width: '100%',
+              paddingVertical: 20,
               zIndex: 40,
             }}
           >
@@ -94,7 +104,7 @@ export default function App() {
                 </Text>
               </Pressable>
             ))}
-          </View>
+          </ScrollView>
         </SafeAreaView>
       </GestureHandlerRootView>
     </SafeAreaProvider>

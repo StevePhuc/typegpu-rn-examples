@@ -14,6 +14,8 @@ export class EventHandler {
   private mouseX = 1.0;
   private targetMouseX = 1.0;
   private isPointerDown = false;
+  // biome-ignore lint/correctness/noUnusedPrivateClassMembers: canvasWidth is updated for size changes
+  private canvasWidth: number;
 
   constructor(canvasWidth: number) {
     this.canvasWidth = canvasWidth;
